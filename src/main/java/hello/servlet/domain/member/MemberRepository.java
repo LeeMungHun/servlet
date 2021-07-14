@@ -12,7 +12,7 @@ public class MemberRepository {
 
     private static final MemberRepository instance = new MemberRepository();
 
-    public static MemberRepository getInstance(){
+    public static MemberRepository getInstance() {
         return instance;
     }
 
@@ -27,13 +27,14 @@ public class MemberRepository {
         return m;
     }
 
-    public Member findById(Long id){
+    public Member findById(Long id) {
         return store.get(id);
     }
 
-    public List<Member> findAll(){
+    public List<Member> findAll() {
         return new ArrayList<>(store.values());
     }
+
 
     public void clearStore(){
         store.clear();
