@@ -1,0 +1,70 @@
+package hello.servlet.web.frontcontroller.v4;
+
+import hello.servlet.web.frontcontroller.ModelView;
+import hello.servlet.web.frontcontroller.MyView;
+import hello.servlet.web.frontcontroller.v3.ControllerV3;
+
+import hello.servlet.web.frontcontroller.v4.controller.MemberFormControllerV4;
+import hello.servlet.web.frontcontroller.v4.controller.MemberListControllerV4;
+import hello.servlet.web.frontcontroller.v4.controller.MemberSaveControllerV4;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+@WebServlet(name = "frontControllerServletV4", urlPatterns = "/front-controller/v4/*")
+public class FrontControllerServletV4 extends HttpServlet {
+    private Map<String, ControllerV4> controllerV4Map = new HashMap<>();
+
+    public FrontControllerServletV4() {
+        controllerV4Map.put("/front-controller/v4/members/new-form", new MemberFormControllerV4());
+        controllerV4Map.put("/front-controller/v4/members", new MemberListControllerV4());
+        controllerV4Map.put("/front-controller/v4/members/save", new MemberSaveControllerV4());
+    }
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("FrontControllerServletV4.service");
+
+        String requestURL = req.getRequestURI();
+
+        ControllerV4 a = controllerV4Map.get(requestURL);
+        if(a == null){
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            System.out.println("11");
+            return;
+        }
+
+        //paraMap
+
+        Map<String, String> paraMap = createParamMap(req);
+        Map<String, Object> model = new HashMap<>();
+
+        //controller 호출
+        String viewName = a.process(paraMap, model);
+
+        //String viewName = mv.getViewName();// 논리값만 가져올 수 있음. new-form
+        //절대경로 변환 
+        MyView myView = viewResolver(viewName);
+        myView.render(model , req, resp);
+
+    }
+
+    private MyView viewResolver(String viewName) {
+        return new MyView("/WEB-INF/views/" + viewName + ".jsp");
+    }
+
+    private Map<String, String> createParamMap(HttpServletRequest req) {
+        Map<String, String> paraMap = new HashMap<>();
+        req.getParameterNames().asIterator()
+                .forEachRemaining(paramName -> paraMap.put(paramName, req.getParameter(paramName)));
+        return paraMap;
+    }
+
+
+}
